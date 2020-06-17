@@ -3,8 +3,6 @@ defmodule AcornWeb.PageController do
 
   alias Acorn.Wiki
   alias Acorn.Wiki.Page
-  alias Acorn.Auth.User
-  alias Acorn.Auth
 
   alias Acorn.Repo
   require Logger
@@ -12,12 +10,16 @@ defmodule AcornWeb.PageController do
   action_fallback AcornWeb.FallbackController
 
   def index(conn, _params) do
-    IO.inspect(conn.cookies)
-    pages = Wiki.list_pages(conn.query_params)
+    current_user_id = get_session(conn, :current_user_id)
+
+    pages = Wiki.list_pages(conn.query_params, current_user_id)
     render(conn, "index.json", pages: pages)
   end
 
   def create(conn, %{"page" => page_params}) do
+    current_user_id = get_session(conn, :current_user_id)
+    page_params = Map.put_new(page_params, "user_id", current_user_id)
+    
     with {:ok, %Page{} = page} <- Wiki.create_page(page_params) do
       conn
       |> put_status(:created)
@@ -27,8 +29,9 @@ defmodule AcornWeb.PageController do
   end
 
   def show(conn, %{"id" => id}) do
+    current_user_id = get_session(conn, :current_user_id)
     Logger.info inspect(conn, pretty: true)
-    page = Wiki.get_page!(id)
+    page = Wiki.get_page!(id, current_user_id)
     render(conn, "show.json", page: page)
   end
 

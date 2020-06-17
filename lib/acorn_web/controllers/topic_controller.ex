@@ -3,12 +3,12 @@ defmodule AcornWeb.TopicController do
 
   alias Acorn.Wiki
   alias Acorn.Wiki.Topic
-  import Ecto.Query
 
   action_fallback AcornWeb.FallbackController
 
   def index(conn, _params) do
-    topics = Wiki.list_topics()
+    current_user_id = get_session(conn, :current_user_id)
+    topics = Wiki.list_topics(current_user_id)
     render(conn, "render_topics_with_count.json", topics: topics)
   end
 

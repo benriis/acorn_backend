@@ -18,7 +18,7 @@ defmodule AcornWeb.Router do
   end
 
   scope "/api", AcornWeb do
-    pipe_through [:api] #, :api_auth 
+    pipe_through [:api, :api_auth] 
     
     resources "/topics", TopicController, only: [:index]
     resources "/pages", PageController

@@ -5,7 +5,6 @@ defmodule Acorn.Wiki do
 
   import Ecto.Query, warn: false
   alias Acorn.Repo
-  import IO
 
   alias Acorn.Wiki.Page
   alias Acorn.Wiki.Topic
@@ -20,14 +19,15 @@ defmodule Acorn.Wiki do
       [%Page{}, ...]
 
   """
-  def list_pages(params) when params == %{} do
-    Repo.all(Page)
+  def list_pages(params, user_id) when params == %{} do
+    Repo.all(from p in Page, where: p.user_id==^user_id)
     |> Repo.preload(:children)
     |> Repo.preload(:parent)
   end
 
-  def list_pages(params) do
+  def list_pages(params, user_id) do
     query = from p in Page, 
+      where: p.user_id==^user_id,
       inner_join: pt in PageTopic, 
       on: p.id==pt.page_id, 
       inner_join: t in Topic, 
@@ -55,8 +55,8 @@ defmodule Acorn.Wiki do
       ** (Ecto.NoResultsError)
 
   """
-  def get_page!(id) do 
-    Repo.get!(Page, id) 
+  def get_page!(id, user_id) do 
+    Repo.get_by!(Page, [id: id, user_id: user_id]) 
     |> Repo.preload(:children)
     |> Repo.preload(:parent)
     |> Repo.preload(:topics)
@@ -79,8 +79,10 @@ defmodule Acorn.Wiki do
   def create_page(attrs \\ %{}) do
     topics = attrs["topics"] |> String.downcase() |> String.split(", ")
     attrs = Map.delete(attrs, "topics")
+    IO.inspect(attrs, label: "from create_page at wiki: ")
     %Page{}
     |> Page.changeset(attrs)
+    |> IO.inspect(label: "Been to changeset now: ")
     |> Repo.insert()
     |> case do
       {:ok, page} -> add_tag({:ok, page}, topics)
@@ -148,10 +150,16 @@ defmodule Acorn.Wiki do
       [%Topic{}, ...]
 
   """
-  def list_topics do
-    query = from p in Topic, join: pt in PageTopic, on: pt.topic_id==p.id, group_by: [p.text, p.id], select: %{id: p.id, text: p.text, count: count(pt.id)}
+  def list_topics(user_id) do
+    subquery = from(p in Page, where: p.user_id == ^user_id, select: p.id)
+
+    query = from t in Topic, 
+      join: pt in PageTopic, 
+      on: pt.topic_id==t.id,
+      where: pt.page_id in subquery(subquery),
+      group_by: [t.text, t.id], 
+      select: %{id: t.id, text: t.text, count: count(pt.id)}
     Repo.all(query)
-    # Repo.all(Topic)
   end
 
   @doc """
