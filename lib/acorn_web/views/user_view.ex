@@ -30,4 +30,8 @@ defmodule AcornWeb.UserView do
   def render("401.json", %{message: message}) do
     %{errors: %{detail: message}}
   end
+
+  def render("log_out.json", %{message: message}) do 
+    %{message: message}
+  end
 end

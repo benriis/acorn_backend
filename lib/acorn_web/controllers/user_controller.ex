@@ -3,6 +3,7 @@ defmodule AcornWeb.UserController do
 
   alias Acorn.Auth
   alias Acorn.Auth.User
+  alias Acorn.Guardian
 
   action_fallback AcornWeb.FallbackController
 
@@ -57,5 +58,12 @@ defmodule AcornWeb.UserController do
         |> put_view(AcornWeb.ErrorView)
         |> render("401.json", message: message)
     end
+  end
+
+  def log_out(conn, _params) do
+    conn
+    |> clear_session()
+    |> put_status(:ok)
+    |> render("log_out.json", message: "nibba")
   end
 end
