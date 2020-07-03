@@ -43,7 +43,7 @@ defmodule AcornWeb.Endpoint do
   plug Plug.Session, @session_options
 
   plug Corsica,
-    origins: "http://192.168.56.1:3000",
+    origins: "http://192.168.86.45:3000",
     allow_credentials: true, 
     allow_headers: ["Content-Type"],
     log: [rejected: :error, invalid: :warn, accepted: :debug]

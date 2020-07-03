@@ -15,7 +15,7 @@ defmodule AcornWeb.Router do
     pipe_through :api
 
     post "/users/sign_in", UserController, :sign_in
-    post "/users/sign_up", UserController, :create
+    post "/users", UserController, :create
   end
 
   scope "/api", AcornWeb do

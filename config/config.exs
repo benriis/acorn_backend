@@ -12,7 +12,7 @@ config :acorn,
 
 # Configures the endpoint
 config :acorn, AcornWeb.Endpoint,
-  url: [host: "192.168.56.1"],
+  url: [host: "192.168.86.45"],
   secret_key_base: "VxmYfN6Q6795ekEIKp792NKK97BoDO09RwgkZv2L42xtrwds5uX8DGwaybpoLKdR",
   render_errors: [view: AcornWeb.ErrorView, accepts: ~w(json)],
   pubsub: [name: Acorn.PubSub, adapter: Phoenix.PubSub.PG2],

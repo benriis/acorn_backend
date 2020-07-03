@@ -30,13 +30,13 @@ defmodule AcornWeb.PageController do
 
   def show(conn, %{"id" => id}) do
     current_user_id = get_session(conn, :current_user_id)
-    Logger.info inspect(conn, pretty: true)
     page = Wiki.get_page!(id, current_user_id)
     render(conn, "show.json", page: page)
   end
 
   def update(conn, %{"id" => id, "page" => page_params}) do
-    page = Wiki.get_page!(id)
+    current_user_id = get_session(conn, :current_user_id)
+    page = Wiki.get_page!(id, current_user_id)
     with {:ok, %Page{} = page} <- Wiki.update_page(page, page_params) do
       render(conn, "show.json", page: page)
     end
