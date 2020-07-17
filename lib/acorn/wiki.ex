@@ -123,6 +123,8 @@ defmodule Acorn.Wiki do
 
   """
   def delete_page(%Page{} = page) do
+    # IO.inspect(page.topics)
+    Enum.each(page.topics, &remove_tag(page.id, &1.id))
     Repo.delete(page)
   end
 

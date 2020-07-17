@@ -43,7 +43,8 @@ defmodule AcornWeb.PageController do
   end
 
   def delete(conn, %{"id" => id}) do
-    page = Wiki.get_page!(id)
+    current_user_id = get_session(conn, :current_user_id)
+    page = Wiki.get_page!(id, current_user_id)
 
     with {:ok, %Page{}} <- Wiki.delete_page(page) do
       send_resp(conn, :no_content, "")
