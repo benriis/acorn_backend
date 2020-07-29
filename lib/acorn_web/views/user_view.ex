@@ -12,8 +12,16 @@ defmodule AcornWeb.UserView do
 
   def render("user.json", %{user: user}) do
     %{id: user.id,
-      email: user.email,
+      username: user.username,
       is_active: user.is_active}
+  end
+
+  def render("jwt.json", %{jwt: jwt}) do
+    %{jwt: jwt}
+  end
+
+  def render("jwt_with_user.json", %{jwt: jwt, username: username}) do
+    %{jwt: jwt, username: username}
   end
 
   def render("sign_in.json", %{user: user}) do
@@ -21,7 +29,7 @@ defmodule AcornWeb.UserView do
       data: %{
         user: %{
           id: user.id,
-          email: user.email
+          username: user.username
         }
       }
     }
@@ -31,7 +39,7 @@ defmodule AcornWeb.UserView do
     %{errors: %{detail: message}}
   end
 
-  def render("log_out.json", %{message: message}) do 
+  def render("log_out.json", %{message: message}) do
     %{message: message}
   end
 end

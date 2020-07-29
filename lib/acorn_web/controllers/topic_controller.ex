@@ -7,8 +7,9 @@ defmodule AcornWeb.TopicController do
   action_fallback AcornWeb.FallbackController
 
   def index(conn, _params) do
-    current_user_id = get_session(conn, :current_user_id)
-    topics = Wiki.list_topics(current_user_id)
+    # current_user_id = get_session(conn, :current_user_id)
+    current_user = Guardian.Plug.current_resource(conn)
+    topics = Wiki.list_topics(current_user.id)
     render(conn, "render_topics_with_count.json", topics: topics)
   end
 
@@ -16,7 +17,7 @@ defmodule AcornWeb.TopicController do
     with {:ok, %Topic{} = topic} <- Wiki.create_topic(topic_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.topic_path(conn, :show, topic))
+      # |> put_resp_header("location", Routes.topic_path(conn, :show, topic))
       |> render("show.json", topic: topic)
     end
   end

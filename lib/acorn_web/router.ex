@@ -8,7 +8,7 @@ defmodule AcornWeb.Router do
   end
 
   pipeline :api_auth do
-    plug :ensure_authenticated
+    plug Acorn.Guardian.AuthPipeline
   end
 
   scope "/api", AcornWeb do
@@ -19,25 +19,11 @@ defmodule AcornWeb.Router do
   end
 
   scope "/api", AcornWeb do
-    pipe_through [:api, :api_auth] 
-    
+    pipe_through [:api, :api_auth]
+
     get "/users/log_out", UserController, :log_out
     resources "/topics", TopicController, only: [:index]
     resources "/pages", PageController
     resources "/users", UserController, except: [:new, :edit]
-  end
-
-  defp ensure_authenticated(conn, _opts) do
-    current_user_id = get_session(conn, :current_user_id)
-    # Logger.info inspect(conn, pretty: true)
-    if current_user_id do
-      conn
-    else
-      conn
-      |> put_status(:unauthorized)
-      |> put_view(AcornWeb.ErrorView)
-      |> render("401.json", message: "Unautherized user")
-      |> halt()
-    end
   end
 end

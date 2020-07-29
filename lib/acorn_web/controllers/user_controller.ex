@@ -13,12 +13,11 @@ defmodule AcornWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Auth.create_user(user_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.user_path(conn, :show, user))
-      |> render("show.json", user: user)
-    end
+    with {:ok, %User{} = user} <- Auth.create_user(user_params),
+      {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
+        conn
+        |> render("jwt.json", jwt: token)
+      end
   end
 
   def show(conn, %{"id" => id}) do
@@ -42,21 +41,30 @@ defmodule AcornWeb.UserController do
     end
   end
 
-  def sign_in(conn, %{"email" => email, "password" => password}) do
-    case Acorn.Auth.authenticate_user(email, password) do
-      {:ok, user} ->
-        conn
-        |> put_session(:current_user_id, user.id)
-        |> put_status(:ok)
-        |> put_view(AcornWeb.UserView)
-        |> render("sign_in.json", user: user)
+  # def sign_in(conn, %{"email" => email, "password" => password}) do
+  #   case Acorn.Auth.authenticate_user(email, password) do
+  #     {:ok, user} ->
+  #       conn
+  #       |> put_session(:current_user_id, user.id)
+  #       |> put_status(:ok)
+  #       |> put_view(AcornWeb.UserView)
+  #       |> render("sign_in.json", user: user)
 
-      {:error, message} ->
+  #     {:error, message} ->
+  #       conn
+  #       |> delete_session(:current_user_id)
+  #       |> put_status(:unauthorized)
+  #       |> put_view(AcornWeb.ErrorView)
+  #       |> render("401.json", message: message)
+  #   end
+  # end
+
+  def sign_in(conn, %{"username" => username, "password" => password}) do
+    case Auth.token_sign_in(username, password) do
+      {:ok, token, _claims} ->
         conn
-        |> delete_session(:current_user_id)
-        |> put_status(:unauthorized)
-        |> put_view(AcornWeb.ErrorView)
-        |> render("401.json", message: message)
+          |> render("jwt_with_user.json", %{jwt: token, username: username})
+        _ -> {:error, :unauthorized}
     end
   end
 
@@ -64,6 +72,6 @@ defmodule AcornWeb.UserController do
     conn
     |> clear_session()
     |> put_status(:ok)
-    |> render("log_out.json", message: "nibba")
+    |> render("log_out.json", message: "logged out")
   end
 end

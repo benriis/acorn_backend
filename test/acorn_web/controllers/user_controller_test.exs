@@ -6,18 +6,18 @@ defmodule AcornWeb.UserControllerTest do
   alias Plug.Test
 
   @create_attrs %{
-    email: "some email",
+    username: "some username",
     is_active: true,
     password: "some password"
   }
   @update_attrs %{
-    email: "some updated email",
+    username: "some updated username",
     is_active: false,
     password: "some updated password"
   }
-  @invalid_attrs %{email: nil, is_active: nil, password: nil}
+  @invalid_attrs %{username: nil, is_active: nil, password: nil}
   @current_user_attrs %{
-    email: "some current user email",
+    username: "some current user username",
     is_active: true,
     password: "some current user password"
   }
@@ -27,7 +27,7 @@ defmodule AcornWeb.UserControllerTest do
     user
   end
 
-  def fixture(:current_user) do 
+  def fixture(:current_user) do
     {:ok, current_user} = Auth.create_user(@current_user_attrs)
     current_user
   end

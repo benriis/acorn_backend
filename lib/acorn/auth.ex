@@ -7,6 +7,7 @@ defmodule Acorn.Auth do
   alias Acorn.Repo
 
   alias Acorn.Auth.User
+  alias Acorn.Guardian
 
   @doc """
   Returns the list of users.
@@ -102,24 +103,28 @@ defmodule Acorn.Auth do
     User.changeset(user, %{})
   end
 
-  def authenticate_user(email, password) do
-    query = from(u in User, where: u.email == ^email)
-    query
-    |> Repo.one()
-    |> verify_password(password)
+  def authenticate_user(nil, _password), do: {:error, :invalid}
+  def authenticate_user(_username, nil), do: {:error, :invalid}
+
+  def authenticate_user(username, password) do
+    query = from u in User, where: u.username == ^username
+    case Repo.one(query) do
+      nil ->
+        Comeonin.Bcrypt.dummy_checkpw
+        {:error, :unauthorised}
+      user ->
+        if Comeonin.Bcrypt.checkpw(password, user.password_hash) do
+          {:ok, user}
+        else
+          {:error, :unauthorised}
+        end
+    end
   end
 
-  defp verify_password(nil, _) do
-    # Perfom a dummy check to make user enumeration more difficult??
-    Bcrypt.no_user_verify()
-    {:error, "Wrong email or password (dummy check)"}
-  end
-
-  defp verify_password(user, password) do
-    if Bcrypt.verify_pass(password, user.password_hash) do
-      {:ok, user}
-    else 
-      {:error, "Wrong email or password"}
+  def token_sign_in(username, password) do
+    case authenticate_user(username, password) do
+      {:ok, user} -> Guardian.encode_and_sign(user)
+      _ -> {:error, :unauthorized}
     end
   end
 
