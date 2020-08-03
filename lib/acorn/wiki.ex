@@ -20,12 +20,14 @@ defmodule Acorn.Wiki do
 
   """
   def list_pages(params, user_id) when params == %{} do
+    IO.inspect(params, label: "params: ")
     Repo.all(from p in Page, where: p.user_id==^user_id)
     |> Repo.preload(:children)
     |> Repo.preload(:parent)
   end
 
   def list_pages(params, user_id) do
+    IO.inspect(params, label: "params: ")
     query = from p in Page,
       where: p.user_id==^user_id,
       inner_join: pt in PageTopic,
