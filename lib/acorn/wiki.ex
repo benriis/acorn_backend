@@ -27,8 +27,6 @@ defmodule Acorn.Wiki do
   end
 
   def list_pages(params, user_id) do
-<<<<<<< HEAD
-
     Page
     |> with_owner(user_id)
     |> with_tag(params["tag"])
@@ -43,11 +41,6 @@ defmodule Acorn.Wiki do
 
   defp with_tag(query, tag) when tag != nil do
     from p in query,
-=======
-    IO.inspect(params, label: "params: ")
-    query = from p in Page,
-      where: p.user_id==^user_id,
->>>>>>> b9ec183f26d1d075fe8477291671e6f9a60bebe9
       inner_join: pt in PageTopic,
       on: p.id==pt.page_id,
       inner_join: t in Topic,
