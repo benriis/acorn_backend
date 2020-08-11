@@ -26,19 +26,46 @@ defmodule Acorn.Wiki do
   end
 
   def list_pages(params, user_id) do
-    query = from p in Page,
-      where: p.user_id==^user_id,
+
+    Page
+    |> with_owner(user_id)
+    |> with_tag(params["tag"])
+    |> sorted(params["sort"])
+    |> Repo.all()
+  end
+
+  defp with_owner(query, user_id) do
+    from p in query,
+      where: p.user_id == ^user_id
+  end
+
+  defp with_tag(query, tag) when tag != nil do
+    from p in query,
       inner_join: pt in PageTopic,
       on: p.id==pt.page_id,
       inner_join: t in Topic,
       on: pt.topic_id==t.id,
-      where: t.text==^params["tag"]
-
-    Repo.all(query)
-    # |> Repo.preload(:children)
-    # |> Repo.preload(:parent)
+      where: t.text==^tag
   end
 
+  defp with_tag(query, tag) do
+    query
+  end
+
+  defp sorted(query, direction) when direction != nil do
+    from p in query,
+      order_by: {^String.to_atom(direction), p.updated_at}
+  end
+
+  defp sorted(query, direction) do
+    from p in query,
+      order_by: [asc: p.updated_at]
+  end
+
+  # defp sorted(query, "asc") do
+  #   from p in query,
+  #     order_by: [asc: p.updated_at]
+  # end
 
 
   @doc """
