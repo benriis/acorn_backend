@@ -37,7 +37,9 @@ defmodule AcornWeb.PageController do
   def update(conn, %{"id" => id, "page" => page_params}) do
     current_user = Guardian.Plug.current_resource(conn)
     page = Wiki.get_page!(id, current_user.id)
-
+<<<<<<< HEAD
+=======
+>>>>>>> b9ec183f26d1d075fe8477291671e6f9a60bebe9
     with {:ok, %Page{} = page} <- Wiki.update_page(page, page_params) do
       render(conn, "show.json", page: page)
     end
