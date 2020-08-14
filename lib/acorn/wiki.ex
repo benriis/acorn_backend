@@ -20,13 +20,16 @@ defmodule Acorn.Wiki do
 
   """
   def list_pages(params, user_id) when params == %{} do
-    IO.inspect(params, label: "params: ")
-    Repo.all(from p in Page, where: p.user_id==^user_id)
+    Page
+    |> with_owner(user_id)
+    |> sorted(params["sort"])
+    |> Repo.all()
     |> Repo.preload(:children)
     |> Repo.preload(:parent)
   end
 
   def list_pages(params, user_id) do
+    IO.inspect(params, label: "The sort params: ")
     Page
     |> with_owner(user_id)
     |> with_tag(params["tag"])
@@ -48,7 +51,7 @@ defmodule Acorn.Wiki do
       where: t.text==^tag
   end
 
-  defp with_tag(query, tag) do
+  defp with_tag(query, _tag) do
     query
   end
 
@@ -57,15 +60,10 @@ defmodule Acorn.Wiki do
       order_by: {^String.to_atom(direction), p.updated_at}
   end
 
-  defp sorted(query, direction) do
+  defp sorted(query, _direction) do
     from p in query,
-      order_by: [asc: p.updated_at]
+      order_by: [desc: p.updated_at]
   end
-
-  # defp sorted(query, "asc") do
-  #   from p in query,
-  #     order_by: [asc: p.updated_at]
-  # end
 
 
   @doc """
